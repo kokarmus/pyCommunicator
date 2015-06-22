@@ -3,7 +3,6 @@
 import socket
 from threading import *
 import re, time
-import sys
 
 from AESMsgCr import CCryptoMessage
 
