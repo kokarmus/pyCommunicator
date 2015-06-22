@@ -26,6 +26,7 @@ class CMessanger:
         self.__serverIp4=serverIp
         self.__port=port
         self.__crMsg=CCryptoMessage(crKey)
+        self.__isClientRun=True
     
     def __del__(self):
         try:
@@ -42,10 +43,13 @@ class CMessanger:
         self.__serverSock.listen(1)
         print('SERVER LOG ['+time.strftime('%H:%M:%S')+']: listening...')
         while 1:
+            if self.__isClientRun==False:
+                print('SERVER LOG ['+time.strftime('%H:%M:%S')+']: taking down...')
+                return 0
             connection, clientAddress=self.__serverSock.accept()        
             print('SERVER LOG ['+time.strftime('%H:%M:%S')+']: connection established with: '+str(clientAddress))
             try:
-                while True:
+                while 1:
                     cmsg=connection.recv(1024)
                     if cmsg:                        
                         print('[MSG FROM '+str(clientAddress)+' ('+time.strftime('%H:%M:%S')+')]:\t'+self.__crMsg.decryptMsg(cmsg))
@@ -72,7 +76,11 @@ class CMessanger:
         while True:
             msg=raw_input('ME:\t')
             if msg==':q':
-                sys.exit()
+                self.__isClientRun=False
+                print('CLIENT LOG ['+time.strftime('%H:%M:%S')+']: taking down...')
+                self.__clientSock.close()
+                print('CLIENT LOG ['+time.strftime('%H:%M:%S')+']: socket  closed.')
+                return 0
             emsg=self.__crMsg.encryptMsg(msg)
             try:
                 self.__clientSock.send(emsg)
