@@ -3,19 +3,18 @@
 import socket
 from threading import *
 import re, time
+import sys
 
 from AESMsgCr import CCryptoMessage
 
 class CMessanger:
-    def __init__(self, clientIp, serverIp, clientPort, serverPort, crKey):
+    def __init__(self, clientIp, serverIp, port, crKey):
         if type(clientIp) and type(serverIp) is not str:
             raise Exception('Receiver and server IPv4 must be a string.')
-        if type(clientPort) is not int:
-            raise Exception('clientPort must be integer type.')
-        if type(serverPort) is not int:
-            raise Exception('Server port must be integer type.')  
+        if type(port) is not int:
+            raise Exception('Port must be integer type.') 
         #if recvPort==sendPort:
-        #    raise Exception('Send and receive clientPort must be others.')
+        #    raise Exception('Send and receive port must be others.')
         self.__ip4Pattern=re.compile('\d{1,3}\.\d{1,3}\.\d{1,3}\.$')
         res=self.__ip4Pattern.match(clientIp)
         #if not res:
@@ -25,13 +24,11 @@ class CMessanger:
         #    raise Exception('Wrong  server IPv4 format')
         self.__clientIp4=clientIp
         self.__serverIp4=serverIp
-        self.__clientPort=clientPort
-        self.__serverPort=serverPort
+        self.__port=port
         self.__crMsg=CCryptoMessage(crKey)
     
     def __del__(self):
         try:
-            #pass
             self.__clientSock
             self.__clientSock.close()
         except Exception as err:
@@ -39,19 +36,19 @@ class CMessanger:
         
     def __startServer(self):
         self.__serverSock=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.__serverAddress=(self.__serverIp4, self.__serverPort)
-        print('SERVER LOG: socket was created on port: '+str(self.__serverPort)+'\tand host: '+self.__serverIp4)
+        self.__serverAddress=(self.__serverIp4, self.__port)
+        print('SERVER LOG ['+time.strftime('%H:%M:%S')+']: socket was created on port: '+str(self.__port)+'\tand host: '+self.__serverIp4)
         self.__serverSock.bind(self.__serverAddress)        
         self.__serverSock.listen(1)
-        print('SERVER LOG: listening...')
+        print('SERVER LOG ['+time.strftime('%H:%M:%S')+']: listening...')
         while 1:
             connection, clientAddress=self.__serverSock.accept()        
-            print('SERVER LOG: connection established with: '+str(clientAddress))
+            print('SERVER LOG ['+time.strftime('%H:%M:%S')+']: connection established with: '+str(clientAddress))
             try:
                 while True:
                     cmsg=connection.recv(1024)
                     if cmsg:                        
-                        print('###MSG FROM '+str(clientAddress)+':\n'+self.__crMsg.decryptMsg(cmsg))
+                        print('[MSG FROM '+str(clientAddress)+' ('+time.strftime('%H:%M:%S')+')]:\t'+self.__crMsg.decryptMsg(cmsg))
                     else:
                         break
             finally:
@@ -59,23 +56,23 @@ class CMessanger:
                 connection.close()
     
     def __startClient(self):
-        print('CLIENT LOG: starting...')
+        print('CLIENT LOG ['+time.strftime('%H:%M:%S')+']: starting...')
         self.__clientSock=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        print('CLIENT LOG: socket was created...')
-        clientAddress=(self.__clientIp4, self.__clientPort)
+        print('CLIENT LOG ['+time.strftime('%H:%M:%S')+']: socket was created...')
+        clientAddress=(self.__clientIp4, self.__port)
         while 1:
             try:
-                print('CLIENT LOG: try connect with: '+self.__clientIp4+' on port: '+str(self.__clientPort))
+                print('CLIENT LOG ['+time.strftime('%H:%M:%S')+']: try connect with: '+self.__clientIp4+' on port: '+str(self.__port))
                 self.__clientSock.connect(clientAddress)
                 break
             except:
-                print('CLIENT LOG: server doesn\'t response. Waiting...')
+                print('CLIENT LOG ['+time.strftime('%H:%M:%S')+']: server doesn\'t response. Waiting...')
                 time.sleep(2)
-        print('CLIENT LOG: connected with server.')
+        print('CLIENT LOG ['+time.strftime('%H:%M:%S')+']: connected with server.')
         while True:
-            msg=raw_input('ME:\n')
+            msg=raw_input('ME:\t')
             if msg==':q':
-                return 0
+                sys.exit()
             emsg=self.__crMsg.encryptMsg(msg)
             try:
                 self.__clientSock.send(emsg)
