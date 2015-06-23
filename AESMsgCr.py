@@ -2,9 +2,8 @@
 
 #from Crypto.Cipher import AES
 #from Crypto import Random
-from msgCipher import IMessageCipher
 
-class CCryptoMessage(IMessageCipher):
+class CCryptoMessage:
     def __init__(self, key):
         if type(key) is not str:
             raise Exception('Key must be a string.')
