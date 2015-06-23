@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
-from Crypto.Cipher import AES
-from Crypto import Random
+#from Crypto.Cipher import AES
+#from Crypto import Random
 from msgCipher import IMessageCipher
 
 class CCryptoMessage(IMessageCipher):
@@ -12,8 +12,8 @@ class CCryptoMessage(IMessageCipher):
             #AES 128-because key is 16 bytes || (16, 24, 32) bytes keys gaves us (128, 192, 256) AES
             raise Exception('Length of key must be equal 16, 24 or 32')
         self.__key=key
-        self.__iv=Random.new().read(AES.block_size)
-        self.__cipher=AES.new(self.__key, AES.MODE_CFB, self.__iv)
+        #self.__iv=Random.new().read(AES.block_size)
+        #self.__cipher=AES.new(self.__key, AES.MODE_CFB, self.__iv)
         self.__info='AES:\t'+str(len(self.__key))+' bit'
     
     def encryptMsg(self, msg):

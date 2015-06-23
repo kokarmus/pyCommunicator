@@ -5,6 +5,7 @@ from threading import *
 import re, time
 
 from AESMsgCr import CCryptoMessage
+from cmdShell import CCmdShell
 
 class CMessanger:
     def __init__(self, clientIp, serverIp, port, crKey):
@@ -14,18 +15,19 @@ class CMessanger:
             raise Exception('Port must be integer type.') 
         #if recvPort==sendPort:
         #    raise Exception('Send and receive port must be others.')
-        self.__ip4Pattern=re.compile('\d{1,3}\.\d{1,3}\.\d{1,3}\.$')
+        self.__ip4Pattern=re.compile('\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$')
         res=self.__ip4Pattern.match(clientIp)
-        #if not res:
-        #    raise Exception('Wrong receiver IPv4 format.')
+        if not res:
+            raise Exception('Wrong client IPv4 format.')
         res=self.__ip4Pattern.match(serverIp)
-        #if not res:
-        #    raise Exception('Wrong  server IPv4 format')
+        if not res:
+            raise Exception('Wrong  server IPv4 format')
         self.__clientIp4=clientIp
         self.__serverIp4=serverIp
         self.__port=port
         self.__crMsg=CCryptoMessage(crKey)
         self.__isClientRun=True
+        self.__cmdShell=CCmdShell()
     
     def __del__(self):
         try:
@@ -42,13 +44,13 @@ class CMessanger:
         self.__serverSock.listen(1)
         print('SERVER LOG ['+time.strftime('%H:%M:%S')+']: listening...')
         while 1:
-            if self.__isClientRun==False:
+            if not self.__isClientRun:
                 print('SERVER LOG ['+time.strftime('%H:%M:%S')+']: taking down...')
                 return 0
             connection, clientAddress=self.__serverSock.accept()        
             print('SERVER LOG ['+time.strftime('%H:%M:%S')+']: connection established with: '+str(clientAddress))
             try:
-                while 1:
+                while self.__isClientRun:
                     cmsg=connection.recv(1024)
                     if cmsg:                        
                         print('[MSG FROM '+str(clientAddress)+' ('+time.strftime('%H:%M:%S')+')]:\t'+self.__crMsg.decryptMsg(cmsg))
@@ -74,12 +76,15 @@ class CMessanger:
         print('CLIENT LOG ['+time.strftime('%H:%M:%S')+']: connected with server.')
         while True:
             msg=raw_input('ME:\t')
-            if msg==':q':
+            res=self.__cmdShell.shellCmd(msg)
+            if res==1:
                 self.__isClientRun=False
                 print('CLIENT LOG ['+time.strftime('%H:%M:%S')+']: taking down...')
                 self.__clientSock.close()
                 print('CLIENT LOG ['+time.strftime('%H:%M:%S')+']: socket  closed.')
                 return 0
+            elif res<0:
+                continue
             emsg=self.__crMsg.encryptMsg(msg)
             try:
                 self.__clientSock.send(emsg)
