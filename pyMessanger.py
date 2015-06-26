@@ -3,6 +3,7 @@
 import socket
 from threading import *
 import re, time
+import readline
 
 from AESMsgCr import CCryptoMessage
 from cmdShell import CCmdShell
@@ -74,6 +75,8 @@ class CMessanger:
                 print('CLIENT LOG ['+time.strftime('%H:%M:%S')+']: server doesn\'t response. Waiting...')
                 time.sleep(2)
         print('CLIENT LOG ['+time.strftime('%H:%M:%S')+']: connected with server.')
+        readline.parse_and_bind('tab: complete')
+        readline.parse_and_bind('set editing-mode vi')
         while True:
             msg=raw_input('ME:\t')
             res=self.__cmdShell.shellCmd(msg)
