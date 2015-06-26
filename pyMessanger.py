@@ -4,6 +4,7 @@ import socket
 from threading import *
 import re, time
 import readline
+import os
 
 from AESMsgCr import CCryptoMessage
 from cmdShell import CCmdShell
@@ -55,6 +56,11 @@ class CMessanger:
                     cmsg=connection.recv(1024)
                     if cmsg:                        
                         print('[MSG FROM '+str(clientAddress)+' ('+time.strftime('%H:%M:%S')+')]:\t'+self.__crMsg.decryptMsg(cmsg))
+                        #add system recognization and simple framework
+                        os.system('play --no-show-progress --null --channels 1 synth %s sine %f' % ( 0.17, 256))
+                        os.system('play --no-show-progress --null --channels 1 synth %s sine %f' % ( 0.15, 512))
+                        os.system('play --no-show-progress --null --channels 1 synth %s sine %f' % ( 0.12, 768))
+                        #os.system('play --no-show-progress --null --channels 1 synth %s sine %f' % ( 0.15, 512))
                     else:
                         break
             finally:
