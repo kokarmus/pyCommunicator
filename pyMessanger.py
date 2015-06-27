@@ -4,19 +4,17 @@ import socket
 from threading import *
 import re, time
 import readline
-import os
 
 from AESMsgCr import CCryptoMessage
 from cmdShell import CCmdShell
+from sound import CSound
 
 class CMessanger:
     def __init__(self, clientIp, serverIp, port, crKey):
         if type(clientIp) and type(serverIp) is not str:
             raise Exception('Receiver and server IPv4 must be a string.')
         if type(port) is not int:
-            raise Exception('Port must be integer type.') 
-        #if recvPort==sendPort:
-        #    raise Exception('Send and receive port must be others.')
+            raise Exception('Port must be integer type.')
         self.__ip4Pattern=re.compile('\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$')
         res=self.__ip4Pattern.match(clientIp)
         if not res:
@@ -57,10 +55,7 @@ class CMessanger:
                     if cmsg:                        
                         print('[MSG FROM '+str(clientAddress)+' ('+time.strftime('%H:%M:%S')+')]:\t'+self.__crMsg.decryptMsg(cmsg))
                         #add system recognization and simple framework
-                        os.system('play --no-show-progress --null --channels 1 synth %s sine %f' % ( 0.17, 256))
-                        os.system('play --no-show-progress --null --channels 1 synth %s sine %f' % ( 0.15, 512))
-                        os.system('play --no-show-progress --null --channels 1 synth %s sine %f' % ( 0.12, 768))
-                        #os.system('play --no-show-progress --null --channels 1 synth %s sine %f' % ( 0.15, 512))
+                        CSound.play()
                     else:
                         break
             finally:
