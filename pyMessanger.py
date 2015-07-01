@@ -5,7 +5,7 @@ from threading import *
 import re, time
 import readline
 
-from AESMsgCr import CCryptoMessage
+from desMsgCr import CDESCrypt
 from cmdShell import CCmdShell
 from sound import CSound
 
@@ -25,7 +25,7 @@ class CMessanger:
         self.__clientIp4=clientIp
         self.__serverIp4=serverIp
         self.__port=port
-        self.__crMsg=CCryptoMessage(crKey)
+        self.__crMsg=CDESCrypt()
         self.__isClientRun=True
         self.__cmdShell=CCmdShell()
     
